@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('books.index') }}">Books</a></li>
+        <li class="breadcrumb-item active">{{ book.title[:40] }}{% if book.title|length > 40 %}...{% endif %}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card p-4">
+            <h3 class="fw-bold mb-1">{{ book.title }}</h3>
+            <p class="text-muted fs-5 mb-3"><i class="bi bi-person me-1"></i>{{ book.author }}</p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded">
+                        <div class="text-muted small">ISBN</div>
+                        <div class="fw-semibold">{{ book.isbn }}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded">
+                        <div class="text-muted small">Publisher</div>
+                        <div class="fw-semibold">{{ book.publisher or 'Unknown' }}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded">
+                        <div class="text-muted small">Publication Year</div>
+                        <div class="fw-semibold">{{ book.publication_year if book.publication_year and book.publication_year > 0 else 'Unknown' }}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-light rounded">
+                        <div class="text-muted small">Copies</div>
+                        <div class="fw-semibold">{{ book.available_copies }} / {{ book.total_copies }} available</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                {% if user_has_active_borrow %}
+                    <span class="btn btn-secondary disabled"><i class="bi bi-check-circle me-2"></i>Already Borrowed</span>
+                    <form method="POST" action="{{ url_for('borrow.return_book', transaction_id=user_has_active_borrow.transaction_id) }}">
+                        <button class="btn btn-outline-danger" onclick="return confirm('Return this book?')">
+                            <i class="bi bi-arrow-return-left me-2"></i>Return Book
+                        </button>
+                    </form>
+                {% elif book.available_copies > 0 %}
+                    <form method="POST" action="{{ url_for('borrow.checkout', isbn=book.isbn) }}">
+                        <button class="btn btn-primary btn-lg" onclick="return confirm('Borrow this book for 14 days?')">
+                            <i class="bi bi-book me-2"></i>Borrow Book
+                        </button>
+                    </form>
+                {% else %}
+                    <span class="btn btn-secondary disabled"><i class="bi bi-x-circle me-2"></i>Not Available</span>
+                    {% if not user_has_reservation %}
+                    <form method="POST" action="{{ url_for('borrow.reserve', isbn=book.isbn) }}">
+                        <button class="btn btn-warning" onclick="return confirm('Reserve this book?')">
+                            <i class="bi bi-bookmark me-2"></i>Reserve Book
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="btn btn-warning disabled"><i class="bi bi-bookmark-check me-2"></i>Reserved</span>
+                    <form method="POST" action="{{ url_for('borrow.cancel_reservation', reservation_id=user_has_reservation.reservation_id) }}">
+                        <button class="btn btn-outline-secondary" onclick="return confirm('Cancel reservation?')">
+                            <i class="bi bi-x-circle me-2"></i>Cancel Reservation
+                        </button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mt-3 mt-lg-0">
+        <div class="card p-3">
+            <h6 class="fw-semibold mb-3"><i class="bi bi-info-circle me-2"></i>Availability</h6>
+            <div class="d-flex align-items-center mb-2">
+                <div class="me-3">
+                    {% if book.available_copies > 0 %}
+                    <span class="badge bg-success fs-6 px-3 py-2">Available</span>
+                    {% else %}
+                    <span class="badge bg-danger fs-6 px-3 py-2">Unavailable</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="progress mb-2" style="height:8px;">
+                <div class="progress-bar bg-success" style="width: {{ (book.available_copies / book.total_copies * 100) if book.total_copies > 0 else 0 }}%"></div>
+            </div>
+            <small class="text-muted">{{ book.available_copies }} of {{ book.total_copies }} copies available</small>
+
+            <hr>
+            <h6 class="fw-semibold mb-2">Borrow Policy</h6>
+            <ul class="list-unstyled small text-muted">
+                <li><i class="bi bi-check2 me-2 text-success"></i>Loan period: 14 days</li>
+                <li><i class="bi bi-check2 me-2 text-success"></i>Reservations available</li>
+                <li><i class="bi bi-check2 me-2 text-success"></i>All transactions logged</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

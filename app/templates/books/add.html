@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Add Book{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card p-4">
+            <h4 class="fw-bold mb-4"><i class="bi bi-plus-circle me-2 text-success"></i>Add New Book</h4>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">ISBN <span class="text-danger">*</span></label>
+                    <input type="text" name="isbn" class="form-control" placeholder="e.g. 9780140449136" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control" placeholder="Book title" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Author <span class="text-danger">*</span></label>
+                    <input type="text" name="author" class="form-control" placeholder="Author name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Publisher</label>
+                    <input type="text" name="publisher" class="form-control" placeholder="Publisher name">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Publication Year</label>
+                        <input type="number" name="publication_year" class="form-control" placeholder="e.g. 2020" min="1000" max="2026">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Number of Copies</label>
+                        <input type="number" name="total_copies" class="form-control" value="5" min="1" max="100">
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success px-4"><i class="bi bi-check-lg me-2"></i>Add Book</button>
+                    <a href="{{ url_for('books.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

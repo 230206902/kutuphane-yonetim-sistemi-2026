@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Transaction History{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-clock-history me-2 text-primary"></i>Transaction History</h4>
+
+<ul class="nav nav-tabs mb-4" id="historyTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#borrows">Borrow History ({{ borrows|length }})</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#reservations">Reservations ({{ reservations|length }})</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="borrows">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            {% if current_user.is_librarian() %}<th>User</th>{% endif %}
+                            <th>Book</th><th>Author</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in borrows %}
+                        <tr>
+                            {% if current_user.is_librarian() %}<td><strong>{{ t.user.username }}</strong></td>{% endif %}
+                            <td><a href="{{ url_for('books.detail', isbn=t.isbn) }}" class="text-decoration-none">{{ t.book.title[:40] }}{% if t.book.title|length > 40 %}...{% endif %}</a></td>
+                            <td class="text-muted">{{ t.book.author }}</td>
+                            <td>{{ t.borrow_date }}</td>
+                            <td>{{ t.due_date }}</td>
+                            <td>{{ t.return_date or '—' }}</td>
+                            <td>
+                                {% if t.status == 'returned' %}<span class="badge bg-secondary">Returned</span>
+                                {% elif t.status == 'overdue' %}<span class="badge bg-danger">Overdue</span>
+                                {% else %}<span class="badge bg-success">Active</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="text-center text-muted py-4">No borrow history found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="reservations">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            {% if current_user.is_librarian() %}<th>User</th>{% endif %}
+                            <th>Book</th><th>Author</th><th>Reserved On</th><th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in reservations %}
+                        <tr>
+                            {% if current_user.is_librarian() %}<td><strong>{{ r.user.username }}</strong></td>{% endif %}
+                            <td><a href="{{ url_for('books.detail', isbn=r.isbn) }}" class="text-decoration-none">{{ r.book.title[:40] }}{% if r.book.title|length > 40 %}...{% endif %}</a></td>
+                            <td class="text-muted">{{ r.book.author }}</td>
+                            <td>{{ r.reservation_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% if r.status == 'active' %}<span class="badge bg-warning text-dark">Active</span>
+                                {% elif r.status == 'fulfilled' %}<span class="badge bg-success">Fulfilled</span>
+                                {% else %}<span class="badge bg-secondary">Cancelled</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted py-4">No reservation history found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

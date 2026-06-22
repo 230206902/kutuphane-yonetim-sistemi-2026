@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=libflow-docker-secret-2025
+      - DATABASE_URL=sqlite:////app/data/library.db
+    restart: unless-stopped
